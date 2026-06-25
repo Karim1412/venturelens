@@ -12,38 +12,56 @@ VentureLens AI evaluates startup pitch decks from an investor perspective, provi
 venturelens/
 ├── src/
 │   ├── app/
-│   │   ├── api/evaluate/route.ts    # API endpoint for deck evaluation
-│   │   ├── dashboard/page.tsx       # SaaS dashboard with upload zone
-│   │   ├── results/[id]/page.tsx    # Investor report page
-│   │   ├── page.tsx                 # Landing page
-│   │   ├── layout.tsx               # Root layout
-│   │   └── globals.css              # Theme & design tokens
+│   │   ├── api/evaluate/route.ts    # API endpoint (auto-selects evaluator)
+│   │   ├── dashboard/page.tsx       # Analysis dashboard with paste & examples
+│   │   ├── results/[id]/page.tsx    # Investor report page with scores & radar
+│   │   ├── page.tsx                 # Redirects to /dashboard
+│   │   ├── layout.tsx               # Root layout with Geist font
+│   │   └── globals.css              # TailwindCSS v4 theme tokens
 │   ├── components/
-│   │   ├── ui/                      # Primitive components (Button, Card, Progress, etc.)
+│   │   ├── ui/                      # Button, Card, Progress, Collapsible
 │   │   ├── landing/                 # Landing page sections
 │   │   ├── layout/                  # Sidebar navigation
-│   │   └── results/                 # Report components (ScoreRing, RadarChart, etc.)
+│   │   └── results/                 # ScoreRing, RadarChart, DimensionCard, QuestionCard
 │   ├── services/
-│   │   ├── evaluator.ts             # AI evaluation pipeline engine
-│   │   └── sampleData.ts            # Sample startup evaluation data
+│   │   ├── ai-evaluator.ts          # Groq LLM evaluation engine
+│   │   ├── evaluator.ts             # Heuristic evaluation engine (fallback)
+│   │   ├── examples.ts              # Famous startup deck examples
+│   │   └── sampleData.ts            # Sample evaluation data for demo
 │   ├── types/
 │   │   └── index.ts                 # TypeScript type definitions
 │   └── lib/
 │       └── utils.ts                 # Utility functions & helpers
-├── public/
+├── docs/
+│   └── presentation.md             # Technical presentation
+├── .env.example                     # Groq API configuration template
+├── vercel.json                      # Vercel deployment config
 ├── package.json
 └── tsconfig.json
 ```
 
 ## AI Evaluation Engine
 
-The evaluation pipeline (`src/services/evaluator.ts`) processes deck content through 5 stages:
+Two engines are available, auto-selected at runtime:
 
-1. **Slide Detection** — Categorizes content into slide types (Cover, Problem, Solution, Market, etc.)
-2. **Communication Analysis** — Evaluates grammar, clarity, conciseness, and writing quality
-3. **Narrative Analysis** — Assesses story flow, missing sections, and persuasiveness
-4. **Problem-Solution Fit** — Validates pain severity, market relevance, and scalability
-5. **Report Generation** — Computes weighted scores and generates investor report
+### Engine A: Groq LLM (recommended)
+
+Set `GROQ_API_KEY` in `.env.local` to use Llama 3 70B via Groq Cloud for deep semantic analysis. The LLM acts as a VC partner and returns structured JSON matching the full `InvestorReport` type.
+
+- **Model:** `llama-3.3-70b-versatile` (configurable via `GROQ_MODEL`)
+- **Latency:** ~2–5s per evaluation
+- **Cost:** ~$0.15–0.30 per 1,000 evaluations
+- **Free tier:** Available at https://console.groq.com
+
+### Engine B: Heuristic (fallback — no key needed)
+
+Rule-based pipeline (`src/services/evaluator.ts`) with ~200 heuristics:
+
+1. **Slide Detection** — Categorizes content into slide types
+2. **Communication Analysis** — Readability, jargon, density, data points
+3. **Narrative Analysis** — Section completeness, ordering, content quality
+4. **Problem-Solution Fit** — Pain severity, defensibility, timing, competition
+5. **Report Generation** — Weighted scores and VC questions
 
 ### Scoring Weights
 
@@ -68,7 +86,7 @@ The evaluation pipeline (`src/services/evaluator.ts`) processes deck content thr
 | Animations | Framer Motion |
 | Charts | Recharts |
 | Icons | Lucide React |
-| AI Service | Abstract evaluator layer (OpenAI/Claude ready) |
+| AI Service | Groq LLM (Llama 3 70B) + heuristic fallback |
 
 ## Getting Started
 
@@ -78,6 +96,16 @@ npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
+
+### Enable AI Mode (Optional)
+
+```bash
+cp .env.example .env.local
+# Edit .env.local and add your Groq API key:
+#   GROQ_API_KEY=gsk_your_key_here
+```
+
+Get a free key at https://console.groq.com/keys. Without the key, the heuristic engine runs automatically — no config needed.
 
 ## API
 
@@ -99,13 +127,11 @@ Returns the sample evaluation report.
 
 ## Future Improvements
 
-- OpenAI/Claude/Gemini integration for deeper analysis
 - PDF/PPTX file parsing (pdf.js, pptxjs)
 - User authentication and history persistence
 - Batch analysis and portfolio tracking
-- Custom evaluation frameworks
+- Custom evaluation frameworks per industry
 - Export to PDF/PPTX
-- Competitive landscape analysis
 - Real-time collaborative feedback
 
 ---
