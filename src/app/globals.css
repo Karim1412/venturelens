@@ -1,0 +1,95 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+
+  --color-venture-50: #eef2ff;
+  --color-venture-100: #e0e7ff;
+  --color-venture-200: #c7d2fe;
+  --color-venture-300: #a5b4fc;
+  --color-venture-400: #818cf8;
+  --color-venture-500: #6366f1;
+  --color-venture-600: #4f46e5;
+  --color-venture-700: #4338ca;
+  --color-venture-800: #3730a3;
+  --color-venture-900: #312e81;
+
+  --color-surface: #0a0a0f;
+  --color-surface-50: #12121a;
+  --color-surface-100: #1a1a24;
+  --color-surface-200: #22222e;
+  --color-surface-300: #2a2a38;
+
+  --color-border: rgba(255, 255, 255, 0.08);
+  --color-border-hover: rgba(255, 255, 255, 0.12);
+}
+
+:root {
+  --background: #0a0a0f;
+  --foreground: #f1f5f9;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, #818cf8 0%, #6366f1 50%, #4f46e5 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gradient-border {
+  position: relative;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.1), rgba(99, 102, 241, 0.2));
+  padding: 1px;
+  border-radius: 12px;
+}
+
+.gradient-border > * {
+  background: var(--surface);
+  border-radius: 11px;
+}
+
+.glow {
+  box-shadow: 0 0 40px rgba(99, 102, 241, 0.15), 0 0 80px rgba(99, 102, 241, 0.05);
+}
+
+.glow-sm {
+  box-shadow: 0 0 20px rgba(99, 102, 241, 0.1);
+}
+
+.card-gradient {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(139, 92, 246, 0.04), rgba(15, 15, 25, 0.6));
+}
+
+.grid-pattern {
+  background-image: radial-gradient(rgba(99, 102, 241, 0.08) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
