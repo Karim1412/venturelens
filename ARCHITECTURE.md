@@ -3,8 +3,7 @@
 ```mermaid
 graph TB
     subgraph "Frontend"
-        L[Landing Page]
-        D[Dashboard]
+        D[Dashboard<br/>New Analysis]
         R[Results Page]
     end
 
@@ -15,26 +14,29 @@ graph TB
     end
 
     subgraph "API Layer"
-        API[Next.js API Routes<br/>POST /api/evaluate]
+        API[Next.js API Route<br/>POST /api/evaluate]
+        ROUTER{Router<br/>GROQ_API_KEY?}
     end
 
     subgraph "Services"
-        EV[Evaluator Engine<br/>slide detection, scoring<br/>report generation]
-        SD[Sample Data<br/>SupportAI example]
+        AIEV[AI Evaluator<br/>groq-sdk → Llama 3 70B]
+        HEV[Heuristic Evaluator<br/>~200 rules, regex, Flesch]
+        EX[Examples<br/>3 famous startup decks]
+        SD[Sample Data<br/>SupportAI demo]
     end
 
     subgraph "Types"
         T[TypeScript Types<br/>InvestorReport, DimensionScore<br/>SlideCategory]
     end
 
-    L --> D
     D --> API
-    API --> EV
-    EV --> T
+    API --> ROUTER
+    ROUTER -->|yes| AIEV
+    ROUTER -->|no| HEV
+    AIEV --> T
+    HEV --> T
     D --> R
-    R --> EV
     R --> SD
-    UI --> L
     UI --> D
     UI --> R
     RES --> R
@@ -46,18 +48,27 @@ graph TB
 
 ```mermaid
 sequenceDiagram
-    User->>Dashboard: Upload deck / paste text
+    User->>Dashboard: Paste deck / load example
     Dashboard->>API: POST /api/evaluate
-    API->>Evaluator: evaluateDeck(content)
-    Evaluator->>Evaluator: detectSlideCategories()
-    Evaluator->>Evaluator: analyzeCommunication()
-    Evaluator->>Evaluator: analyzeNarrative()
-    Evaluator->>Evaluator: analyzeProblemSolution()
-    Evaluator->>Evaluator: computeOverallScore()
-    Evaluator->>Evaluator: generateReport()
-    API-->>Dashboard: EvaluationResult
+    API->>API: Check GROQ_API_KEY?
+    alt key set
+        API->>Groq: evaluateDeckAI(content)
+        Groq->>Groq: Llama 3 70B inference
+        Groq-->>API: Structured JSON report
+    else no key
+        API->>Heuristic: evaluateDeck(content)
+        Heuristic->>Heuristic: detectSlideCategories()
+        Heuristic->>Heuristic: analyzeCommunication()
+        Heuristic->>Heuristic: analyzeNarrative()
+        Heuristic->>Heuristic: analyzeProblemSolution()
+        Heuristic->>Heuristic: computeOverallScore()
+        Heuristic-->>API: Computed report
+    end
+    API-->>Dashboard: { report, id }
+    Dashboard->>sessionStorage: Store report
     Dashboard->>Results: Navigate to /results/[id]
-    Results->>Results: Render investor report
+    Results->>sessionStorage: Read report
+    Results->>Results: Render score ring, radar, cards
 ```
 
 ## Evaluation Pipeline
